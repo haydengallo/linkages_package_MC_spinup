@@ -47,7 +47,7 @@
 ##' @return dbh.save=dbh.save matrix of dbh increment of trees each year
 ##' @return iage.save=iage.save matrix of age of each tree each year
 ##'
-linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = NULL){
+linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = NULL, bio_method){
 
   if(is.null(restart)) restart = FALSE
   if(is.null(restart)) linkages.restart = NA
@@ -252,7 +252,7 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
       output.out <- output(availn = availn, tyln = tyln, nspec = nspec, frt=spp.params$FRT,
                          iage = iage,slta = spp.params$SLTA, max.ind = max.ind,
                          sltb = spp.params$SLTB,dbh = dbh,fwt = spp.params$FWT,tyl = tyl,
-                         ntrees=ntrees,awp=awp)
+                         ntrees=ntrees,awp=awp, bio_method=bio_method, spp.num=spp.params$Spp_Number)
 
       #conversion factors
       DEFAULT.C <- 0.48  ## mass percent C of biomass

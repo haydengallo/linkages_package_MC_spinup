@@ -22,7 +22,7 @@
 ##' @return bar specieis biomass t/ha
 ##' @export
 ##'
-output <- function(availn,tyln,nspec,frt,iage,slta,sltb,dbh,fwt,tyl,max.ind,ntrees,awp){
+output <- function(availn,tyln,nspec,frt,iage,slta,sltb,dbh,fwt,tyl,max.ind,ntrees,awp,bio_method,spp.num = spp.params$Spp_Number){
 
   #initialization
   area = 0 #leaf area
@@ -40,16 +40,123 @@ output <- function(availn,tyln,nspec,frt,iage,slta,sltb,dbh,fwt,tyl,max.ind,ntre
   #calculate spp biomass, total biomass, total number of stems, leaf area, and total woody production
   nl = 1
   for(i in 1:nspec){
+
+    # initialize
+    if(bio_method == 'lambert'){
+      y_wood = 0
+      y_bark = 0
+      y_foliage = 0
+      y_branches = 0
+      tot = 0
+    }
     bar[i] = 0
     abvgrnwood[i] = 0
     if(ntrees[i]==0) next
     nu = nl + ntrees[i] - 1
     ret = frt[i]
+
+    code = spp.num[i]
+
+    # add coefficients
+    if(bio_method == 'chojnacky'){
+      if(code == 'ACRU'){
+        b_0 = -2.047
+        b_1 = 2.3852
+      }
+      if(code == 'ACSA3'){
+        b_0 = -1.8011
+        b_1 = 2.3852
+      }
+      if(code == 'BEAL2'){
+        b_0 = -1.8096
+        b_1 = 2.348
+      }
+      if(code == 'BELE'){
+        b_0 = -2.2652
+        b_1 = 2.5349
+      }
+      if(code == 'FAGR'){
+        b_0 = -2.0705
+        b_1 = 2.441
+      }
+      if(code == 'PIRU'){
+        b_0 = -2.1364
+        b_1 = 2.3233
+      }
+      if(code == 'PIST'){
+        b_0 = -2.6177
+        b_1 = 2.4638
+      }
+      if(code == 'QUAL'){
+        b_0 = -2.0705
+        b_1 = 2.441
+      }
+      if(code == 'QUMO'){
+        b_0 = -2.0705
+        b_1 = 2.441
+      }
+      if(code == 'QURU'){
+        b_0 = -2.0705
+        b_1 = 2.441
+      }
+      if(code == 'QUVE'){
+        b_0 = -2.0705
+        b_1 = 2.441
+      }
+      if(code == 'THOC2'){
+        b_0 = -1.9615
+        b_1 = 2.1063
+      }
+      if(code == 'TSCA'){
+        b_0 = -2.348
+        b_1 = 2.3876
+      }
+    }
+
+    if(bio_method == 'lambert'){
+      if(code == 'ACRU'){bwood1 = 0.1014; bwood2 = 2.3448; bbark1 = 0.0291; bbark2 = 2.0893;
+                         bbranches1 = 0.0175; bbranches2 = 2.4846; bfoliage1 = 0.0515; bfoliage2 = 1.5198}
+      if(code == 'ACSA3'){bwood1 = 0.1315; bwood2 = 2.3129; bbark1 = 0.0631; bbark2 = 1.6241;
+                          bbranches1 = 0.033; bbranches2 = 2.3741; bfoliage1 = 0.0393; bfoliage2 = 1.693}
+      if(code == 'BEAL2'){bwood1 = 0.1932; bwood2 = 2.1569; bbark1 = 0.0192; bbark2 = 2.2475;
+                          bbranches1 = 0.0305; bbranches2 = 2.4044; bfoliage1 = 0.1119; bfoliage2 = 1.3973}
+      if(code == 'FAGR'){bwood1 = 0.1478; bwood2 = 2.2986; bbark1 = 0.012; bbark2 = 2.2388;
+                         bbranches1 = 0.037; bbranches2 = 2.368; bfoliage1 = 0.0376; bfoliage2 = 1.6164}
+      if(code == 'PIRU'){bwood1 = 0.0989; bwood2 = 2.2814; bbark1 = 0.022; bbark2 = 2.0908;
+                         bbranches1 = 0.0005; bbranches2 = 3.275; bfoliage1 = 0.0066; bfoliage2 = 2.4213}
+      if(code == 'PIST'){bwood1 = 0.0997; bwood2 = 2.2709; bbark1 = 0.0192; bbark2 = 2.2038;
+                         bbranches1 = 0.0056; bbranches2 = 2.6011; bfoliage1 = 0.0284; bfoliage2 = 1.9375}
+      if(code == 'QUAL'){bwood1 = 0.0762; bwood2 = 2.3335; bbark1 = 0.0338; bbark2 = 1.9845;
+                         bbranches1 = 0.0113; bbranches2 = 2.6211; bfoliage1 = 0.0188; bfoliage2 = 1.7881}
+      if(code == 'QURU'){bwood1 = 0.1754; bwood2 = 2.1616; bbark1 = 0.0381; bbark2 = 2.0991;
+                         bbranches1 = 0.0085; bbranches2 = 2.779; bfoliage1 = 0.0373; bfoliage2 = 1.674}
+      if(code == 'TSCA'){bwood1 = 0.0619; bwood2 = 2.3821; bbark1 = 0.0139; bbark2 = 2.3282;
+                         bbranches1 = 0.0217; bbranches2 = 2.2653; bfoliage1 = 0.0776; bfoliage2 = 1.6995}
+    }
     for(j in nl:nu){
       age = iage[j]
 
-      #calculate leaf biomass (kg/tree)
-      folw = ((slta[i]+sltb[i]*dbh[j])/2)^2 * 3.14 * fwt[i] * ret * .001
+      if(bio_method == 'default'){
+        #calculate leaf biomass (kg/tree)
+        folw = ((slta[i]+sltb[i]*dbh[j])/2)^2 * 3.14 * fwt[i] * ret * .001
+        #calculate species biomass (kg/plot)
+        bar[i] = bar[i] + .1193 * dbh[j]^2.393 + folw
+      }
+
+      if(bio_method == 'lambert'){
+        #Lambert allometry
+        y_wood[j] = bwood1*(dbh[j]^bwood2)
+        y_bark[j] = bbark1*(dbh[j]^bbark2)
+        y_foliage[j] = bfoliage1*(dbh[j]^bfoliage2)
+        y_branches[j] = bbranches1*(dbh[j]^bbranches2)
+        tot[j] = y_wood[j] + y_bark[j] + y_foliage[j] + y_branches[j]
+        bar[i] = bar[i] + tot[j]
+      }
+
+      if(bio_method == 'chojnacky'){
+        #Chonjnacky allometry species biomass (kg/plot)
+        bar[i] = bar[i] + (exp(b_0[i])*(dbh[j]^b_1[i]))
+      }
 
       #calculate species biomass (kg/plot)
       bar[i] = bar[i] + .1193 * dbh[j]^2.393 + folw
