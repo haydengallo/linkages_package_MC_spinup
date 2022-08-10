@@ -47,7 +47,7 @@
 ##' @return dbh.save=dbh.save matrix of dbh increment of trees each year
 ##' @return iage.save=iage.save matrix of age of each tree each year
 ##'
-linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = NULL, bio_method){
+linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = NULL){
 
   if(is.null(restart)) restart = FALSE
   if(is.null(restart)) linkages.restart = NA
@@ -140,6 +140,9 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
     }
     Rprof(interval=.005)
     for(i in 1:nyear){
+
+      # Specifying biomass estimation method from inputs
+      bio_method = bio_method
 
       #calculates degree days for the year
       degd <- tempe(temp.vec = temp.mat[i,1:12])
