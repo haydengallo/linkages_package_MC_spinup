@@ -159,7 +159,7 @@ output <- function(availn,tyln,nspec,frt,iage,slta,sltb,dbh,fwt,tyl,max.ind,ntre
       }
 
       #calculate species biomass (kg/plot)
-      bar[i] = bar[i] + .1193 * dbh[j]^2.393 + folw
+      #bar[i] = bar[i] + .1193 * dbh[j]^2.393 + folw
 
       if(dbh[j]>10) {
         abvgrnwood[i] = abvgrnwood[i] + .1193 * dbh[j]^2.393
