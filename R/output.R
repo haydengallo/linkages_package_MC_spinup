@@ -137,7 +137,7 @@ output <- function(availn,tyln,nspec,frt,iage,slta,sltb,dbh,fwt,tyl,max.ind,ntre
 
       if(bio_method == 'chojnacky'){
         #Chonjnacky allometry species biomass (kg/plot)
-        bar[i] = bar[i] + (exp(b_0[i])*(dbh[j]^b_1[i]))
+        bar[i] = bar[i] + (exp(b_0)*(dbh[j]^b_1))
       }
 
       #calculate species biomass (kg/plot)

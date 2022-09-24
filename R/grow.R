@@ -161,7 +161,7 @@ grow <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
 #
 
 grow.opt <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
-                 degdgf,smgf,sngf,frost,rt,iage,nogro,spp.num = spp.params$Spp_Number, LAI_method){
+                 degdgf,smgf,sngf,frost,rt,iage,nogro,spp.num, LAI_method){
   #initialize wood production
   awp = matrix(0,1,max.ind)
   algf.save <- matrix(NA,max.ind,nspec)
@@ -177,7 +177,7 @@ grow.opt <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
     #initialize canopy leaf biomass profile
     if (LAI_method == 'species_specific_LAI'){
       sumla <- array(0,dim=c(1,700,nspec))}
-    else if (LAI_method == 'normal'){sumla = matrix(0,1,700)}
+    if (LAI_method == 'normal'){sumla = matrix(0,1,700)}
 
     #get species list
     spp.ind = c()
@@ -275,7 +275,7 @@ grow.opt <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
           }
           al = 1* (exp(exponent)) #Hall and Hollinger 2000
         }
-        else if (LAI_method == 'normal'){
+        if (LAI_method == 'normal'){
             slar = sumla[iht]
             #calculate available light to this tree (% full sunlight)
             al = 1 * exp(-slar/93750)} ### Original LINKAGES expression for calculating al
