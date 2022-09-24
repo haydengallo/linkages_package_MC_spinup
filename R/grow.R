@@ -161,7 +161,7 @@ grow <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
 #
 
 grow.opt <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
-                 degdgf,smgf,sngf,frost,rt,iage,nogro,spp.num = spp.params$Spp_Number){
+                 degdgf,smgf,sngf,frost,rt,iage,nogro,spp.num = spp.params$Spp_Number, LAI_method){
   #initialize wood production
   awp = matrix(0,1,max.ind)
   algf.save <- matrix(NA,max.ind,nspec)

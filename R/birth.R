@@ -46,7 +46,7 @@
 ##'
 birth <- function(nspec,ntrees,frt,iage,slta,sltb,spp.num,dbh,fwt,
                   degd,dmin,dmax,frost,rt,itol,mplant,nogro,ksprt,sprtnd,
-                  max.ind,smgf,degdgf){
+                  max.ind,smgf,degdgf,LAI_method){
 
   max.seeds <- round(max.ind/nspec)-1 #needs to be less than max.ind
   if((max.ind - (max.seeds*nspec)) < 0) {
