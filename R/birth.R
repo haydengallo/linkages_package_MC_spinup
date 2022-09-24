@@ -46,7 +46,7 @@
 ##'
 birth <- function(nspec,ntrees,frt,iage,slta,sltb,spp.num,dbh,fwt,
                   degd,dmin,dmax,frost,rt,itol,mplant,nogro,ksprt,sprtnd,
-                  max.ind,smgf,degdgf, spp.num = spp.params$Spp_Number){
+                  max.ind,smgf,degdgf){
 
   max.seeds <- round(max.ind/nspec)-1 #needs to be less than max.ind
   if((max.ind - (max.seeds*nspec)) < 0) {
@@ -93,7 +93,6 @@ if(sum(ntrees) < max.ind){
         if (code == 'QUVE'){SLM = 74.56062} # quercus velutina, black oak (from BIEN trait database accessed 23/09/2022)
         if (code == 'PIRU'){SLM = 304.6737} # picea rubens, red spruce (from BIEN trait database accessed 23/09/2022)
         if (code == 'QUMO'){SLM = 76.14184465} # quercus montana, chestnut oak (same values as white oak, closest relative with data)
-        if (folw = 0){folw = 0} #change this line LAI
         if (folw != 0){exponent = exponent + (-folw/(833.3*(1.0/.8)*SLM))} #Hall and Hollinger 2000
       }
       nl = nl + ntrees[i]
@@ -103,7 +102,7 @@ if(sum(ntrees) < max.ind){
   #calculate amount of light at forest floor using original LINKAGES expression
   if (LAI_method == 'species_specific_LAI'){al = 1*(exp(exponent))}
   if (LAI_method == 'normal'){al = 1 * exp(-folw/93750)} #Original LINKAGES expression for calculating al
-  if (LAI_method == 'species_specific_LAI' & folw = 0){al = 1}
+  if (LAI_method == 'species_specific_LAI' & folw == 0){al = 1}
   #calculate number of trees in stand
   ntot = nl - 1
 

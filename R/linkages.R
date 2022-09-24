@@ -193,7 +193,7 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
             frost = spp.params$FROST, rt = temp.mat[i,1:12], itol = spp.params$ITOL,
             mplant = spp.params$MPLANT, nogro = nogro,
             ksprt = ksprt, sprtnd = spp.params$SPRTND, max.ind = max.ind, smgf=smgf,
-            degdgf = degdgf, LAI_method = LAI_method, spp.num = spp.params$Spp_Number)
+            degdgf = degdgf, LAI_method = LAI_method)
 
       if(is.null(unlist(birth.out$ntrees, use.names = FALSE))){
         ntrees[,i,k] <- rep(0,nspec)
