@@ -92,6 +92,7 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
   iage.save <- array(0,dim=c(max.ind,nyear,iplot))
   awp.save <- array(0,dim=c(max.ind,nyear,iplot))
   npp.spp.save <- array(0,dim=c(nspec,nyear,iplot))
+  ba.save <- array(0, dim = c(max.ind, nyear, iplot))
 
   for(k in 1:iplot){ #loop over plots
 
@@ -134,6 +135,7 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
       dbh.save <- array(0,dim=c(max.ind,nyear,iplot))
       iage.save <- array(0,dim=c(max.ind,nyear,iplot))
       awp.save <- array(0,dim=c(max.ind,nyear,iplot))
+      ba.save <- array(0, dim = c(max.ind, nyear, iplot))
 
       temp.mat <- matrix(temp.mat,nyear,12)
       precip.mat <- matrix(precip.mat,nyear,12)
@@ -267,6 +269,7 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
       yearSecs <- (3.15569 * 10^7) ## seconds in a year
 
       #save variables
+      ba.save[,i,k] = unlist(kill.out$ba, use.names = FALSE)
       awp.save[1:length(grow.out$awp),i,k] = unlist(grow.out$awp, use.names = FALSE)
       tstem[i,k] = unlist(output.out$atot, use.names = FALSE) #number of stems
       tab[i,k] = unlist(output.out$tbar, use.names = FALSE) #total aboveground biomass
@@ -288,13 +291,13 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
       ncohrt.save[i,k] = ncohrt
       npp.spp.save[,i,k] = (unlist(grow.out$npp.spp,use.names=FALSE) * (1 / PLOT.AREA) * (1 / yearSecs) * DEFAULT.C)
 
-    print(paste("year = ",i))
+    #print(paste("year = ",i))
     }
     Rprof(NULL)
     summaryRprof()
 
 
-  print(paste("PLOT = ",k))
+  #print(paste("PLOT = ",k))
   }
 
   #unit conversions for variables of interest #need to recheck more carefully later
@@ -336,7 +339,7 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
        dbh.save = dbh.save, iage.save = iage.save, C.mat = C.mat, tyl = tyl,
        ncohrt = ncohrt, area = area, water = water, ksprt = ksprt, tyl.save = tyl.save,
       ff=ff, gf.vec.save = gf.vec.save, algf.save.keep = algf.save.keep,
-      npp.spp.save=npp.spp.save, awp.save = awp.save, file = output.file)
+      npp.spp.save=npp.spp.save, awp.save = awp.save, ba.save = ba.save, file = output.file)
 
   file.exists(output.file)
 

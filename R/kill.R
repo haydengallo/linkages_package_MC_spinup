@@ -45,6 +45,7 @@ kill <- function(nspec, ntrees,slta,sltb,dbh,agemx,ksprt,sprtmn,sprtmx,iage,
 
   #initialize plot basal area
   ba = 0
+  ba.keep <- matrix(, nrow = max.ind, ncol = 1)
 
   #begin main killing loop
   for(i in 1:nspec){
@@ -56,7 +57,9 @@ kill <- function(nspec, ntrees,slta,sltb,dbh,agemx,ksprt,sprtmn,sprtmx,iage,
       folw = ((slta[i] + sltb[i] * dbh[k]) / 2) ^ 2 * 3.14 * fwt[i] * .000012
 
       #calculate basal area
-      ba = ba + .0314 * (dbh[k]*.5) ^ 2
+      ba.keep[k] <- 0.0314 * (dbh[k] * .5) ^ 2
+      ba <- ba + ba.keep[k]
+     # ba = ba + .0314 * (dbh[k]*.5) ^ 2
 
       #kill trees based on probability that only 1% reach max age
       yfl <- rweibull(1,2,iage[k])/rweibull(1,2,agemx[i])#1 - (iage[k]/agemx[i]) #runif(1,0,1) # pexp(iage[k],1/(agemx[i]/2))# pexp(agemx[i],1/(agemx[i]/2)) 4.605/agemx[i] iage[k] > runif(1,(agemx[i]-100),agemx[i])
@@ -154,7 +157,7 @@ kill <- function(nspec, ntrees,slta,sltb,dbh,agemx,ksprt,sprtmn,sprtmx,iage,
 if(length(which(dbh>0)) != sum(ntrees)) browser()
 
   return(list(ntrees = ntrees, dbh = dbh, iage = iage, nogro = nogro,
-              tyl = tyl, ksprt = ksprt))
+              tyl = tyl, ksprt = ksprt, ba = ba.keep))
 
 }
 #
