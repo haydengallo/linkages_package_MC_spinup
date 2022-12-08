@@ -57,7 +57,8 @@ kill <- function(nspec, ntrees,slta,sltb,dbh,agemx,ksprt,sprtmn,sprtmx,iage,
       folw = ((slta[i] + sltb[i] * dbh[k]) / 2) ^ 2 * 3.14 * fwt[i] * .000012
 
       #calculate basal area
-      ba.keep[k] <- pi * (0.01 * dbh[k] * .5) ^ 2
+      #ba.keep[k] <- pi * (0.01 * dbh[k] * .5) ^ 2
+      ba.keep[k] <- 0.0314 * (dbh[k]*.5)^2
       ba <- ba + ba.keep[k]
      # ba = ba + .0314 * (dbh[k]*.5) ^ 2
 
