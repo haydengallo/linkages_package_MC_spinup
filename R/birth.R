@@ -46,7 +46,7 @@
 ##'
 birth <- function(nspec,ntrees,frt,iage,slta,sltb,spp.num,dbh,fwt,
                   degd,dmin,dmax,frost,rt,itol,mplant,nogro,ksprt,sprtnd,
-                  max.ind,smgf,degdgf){
+                  max.ind,smgf,degdgf,LAI_method){
 
   max.seeds <- round(max.ind/nspec)-1 #needs to be less than max.ind
   if((max.ind - (max.seeds*nspec)) < 0) {
@@ -55,13 +55,15 @@ birth <- function(nspec,ntrees,frt,iage,slta,sltb,spp.num,dbh,fwt,
   }
 
 if(sum(ntrees) < max.ind){
-  
+
   #switch.mat1 = matrix(as.logical(switch.mat),nspec,5)
 
   #initialize foliage biomass (folw) and foliage area (fola)
   folw = 0
   fola = 0
   nl = 1
+
+  if (LAI_method == 'species_specific_LAI'){exponent = 0 } # initialize species-specific equation
 
   #calculate leaf weight in G/plot and leaf area index
   for(i in 1:nspec){
@@ -72,19 +74,38 @@ if(sum(ntrees) < max.ind){
         age = iage[k]
         if(age<ret){
           ret = age
-          folw = folw + ((slta[i]+sltb[i]*dbh[k])/2)^2*(3.14*fwt[i]*ret)
-          fola = fola + ((1.9283295) * 10^-4)*((dbh[k])^2.129)
         }
+        folw = folw + ((slta[i]+sltb[i]*dbh[k])/2)^2*(3.14*fwt[i]*ret)
+        fola = fola + ((1.9283295) * 10^-4)*((dbh[k])^2.129)
+      }
+      code = spp.num[i]
+      if (LAI_method == 'species_specific_LAI'){ # g/m2
+        if (code == 'ACRU'){SLM = 60.58990405} # acer rubrum, red maple
+        if (code == 'ACSA3'){SLM = 28.19481571} # acer saccharum, sugar maple
+        if (code == 'BEAL2'){SLM = 28.19574899} # betula alleghaniensis, yellow birch
+        if (code == 'BELE'){SLM = 36.50034675} # betula lenta, sweet birch
+        if (code == 'FAGR'){SLM = 24.1073341} # fagus grandifolia, american beech
+        if (code == 'PIST'){SLM = 55.03011497} # pinus strobus, white pine
+        if (code == 'QUAL'){SLM = 76.14184465} # quercus alba, white oak
+        if (code == 'QURU'){SLM = 65.89359633} # quercus rubra, red oak
+        if (code == 'THOC2'){SLM = 56.7431509} # thuja occidentalis, northern white-cedar
+        if (code == 'TSCA'){SLM = 52.48517294} # tsuga canadensis, eastern hemlock
+        if (code == 'QUVE'){SLM = 74.56062} # quercus velutina, black oak (from BIEN trait database accessed 23/09/2022)
+        if (code == 'PIRU'){SLM = 304.6737} # picea rubens, red spruce (from BIEN trait database accessed 23/09/2022)
+        if (code == 'QUMO'){SLM = 76.14184465} # quercus montana, chestnut oak (same values as white oak, closest relative with data)
+        if (folw != 0){exponent = exponent + (-folw/(833.3*(1.0/.8)*SLM))} #Hall and Hollinger 2000
       }
       nl = nl + ntrees[i]
   }
 
   fola[is.na(fola)] <- 0
-  #calculate amount of light at forest floor
-  al = 1 * exp(-folw/93750)
+  #calculate amount of light at forest floor using original LINKAGES expression
+  if (LAI_method == 'species_specific_LAI'){al = 1*(exp(exponent))}
+  if (LAI_method == 'normal'){al = 1 * exp(-folw/93750)} #Original LINKAGES expression for calculating al
+  if (LAI_method == 'species_specific_LAI' & folw == 0){al = 1}
   #calculate number of trees in stand
   ntot = nl - 1
-  
+
   #determine which species are eligible for planting this year
   #swtch = rep(NA,5) #added this AMR
   #switch 1 is true if the spp requires leaf litter for successful recruitment
@@ -108,15 +129,15 @@ if(sum(ntrees) < max.ind){
 
   newtr = matrix(0,1,100) #added this AMR
 
-  # end recruitment of aspen, pin cherry, and most pine if available light is < 60% of full sunlight and 
+  # end recruitment of aspen, pin cherry, and most pine if available light is < 60% of full sunlight and
   # recruitment of paper birch and white pine if available light is <30% of full sunlight
   for(i in 1:nspec){
-    
+
      code = spp.num[i]
-     
-     if(al<.60 & code == 'PRPE2') next # pin cherry, 
+
+     if(al<.60 & code == 'PRPE2') next # pin cherry,
      if(al<.30 & code == 'LITU') next # yellow poplar
-    
+
      if(al<.60 & code == 'POBA2') next # balsam poplar
      if(al<.60 & code == 'POGR4') next # bigtooth aspen
      if(al<.60 & code == 'POTR5') next # quaking aspen
@@ -152,24 +173,24 @@ if(sum(ntrees) < max.ind){
   if(nw != 0){
     #place iage, dbh, and nogro into temporary arrays
     itemp = iage; dtemp = dbh; ntemp = nogro
-    
-    #create vector to store possible seed bank for this year  
+
+    #create vector to store possible seed bank for this year
     seed.ind = c()
-    
+
     #begin loop to determine nplant for each species
     for(k in 1:nw){
       nsp = newtr[k]
-      
+
       #calculate seedling light multipliers
       slite = 1.5 * (1 - exp(-1.136*(al-.08)))
       if(itol[nsp] < 2) slite = 1 - exp(-4.64*(al-.05))
       if(slite <= 0) slite = 0
-      
+
       #reduce max number of seedlings to the extent that light, soil moisture, and degree days are less than optimum for growth of each species
-      
+
       yfl = runif(1,0,1)
       nplant = mplant[nsp] * slite * smgf[nsp] * degdgf[nsp] * yfl
-      
+
       #see if any stumps of this spp are available for sprouting
       if(ksprt[nsp] > 0 & sprtnd[nsp] > 0){
         yfl = .5 #runif(1,0,1)
@@ -177,54 +198,54 @@ if(sum(ntrees) < max.ind){
         if(al >= .5) nplant = nplant + (sprtnd[nsp]*slite*smgf[nsp]*degdgf[nsp]*ksprt[nsp]) #*yfl
         #if(nplant > max.seeds) nplant = max.seeds #HACK
       }
-      
-      #add the seeds for this species to the seed bank 
+
+      #add the seeds for this species to the seed bank
       #this rounds nplant down to the first whole integer
       seed.ind = c(seed.ind, rep(nsp, nplant))
     }
-    
+
     #now that we have the total possible seed bank for the year, we need to determine how many seeds we can plant
     nseed = length(seed.ind)
-    
-    #if planting all of the seeds would cause the model to exceed max.ind, 
+
+    #if planting all of the seeds would cause the model to exceed max.ind,
     #we need to randomly choose which seeds in bank will get planted
     if (sum(ntrees)+nseed > max.ind){
-      
+
       #how many total seedlings can we plant this year?
       nposs = max.ind - sum(ntrees)
-      
+
       #randomly draw that many seeds from seedbank without replacement
       seed.sample = sample(seed.ind, nposs, replace=FALSE)
-      
+
     }else{
       seed.sample = seed.ind
     }
-    
-    
-    #now we complete another loop to plant the seeds for each species 
+
+
+    #now we complete another loop to plant the seeds for each species
     for(nsp in 1:nspec){
 
       #determine number of seeds for this species
       nplant = length(which(seed.sample == nsp))
-      
+
       #check if there are seeds of this species to plant
       if (nplant < 1) next
-      
+
       #plant!!
       nsum = sum(ntrees[1:nsp])
       nl = nsum + 1
       nup = ntot
-      
+
       #loop through seeds
       for (j in 1:nplant){
-        
-        # increment 
+
+        # increment
         ntot = ntot + 1
         if (ntot > max.ind) print('max.ind has been exceeded')
-        nsum = nsum + 1 
+        nsum = nsum + 1
         ntrees[nsp] = ntrees[nsp] + 1
         itemp[nsum] = 0
-        
+
         #calculate dbh for new trees
         size = 1.27
         yfl = .5#runif(1,0,1)
@@ -240,14 +261,14 @@ if(sum(ntrees) < max.ind){
           n1 = n1 + 1
         }
       }
-      
+
       #reinitialize original dbh and age arrays - including new trees
       iage[1:ntot] = itemp[1:ntot]
       dbh[1:ntot] = dtemp[1:ntot]
       nogro[1:ntot] = ntemp[1:ntot]
     }
   }
-  
+
   #reinitialize array ksprt
   ksprt[1:nspec] = 0
 }else{
