@@ -45,6 +45,7 @@ kill <- function(nspec, ntrees,slta,sltb,dbh,agemx,ksprt,sprtmn,sprtmx,iage,
 
   #initialize plot basal area
   ba = 0
+  ba.keep <- c()
 
   #begin main killing loop
   for(i in 1:nspec){
