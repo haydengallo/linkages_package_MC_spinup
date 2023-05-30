@@ -46,7 +46,7 @@
 ##'
 birth <- function(nspec,ntrees,frt,iage,slta,sltb,spp.num,dbh,fwt,
                   degd,dmin,dmax,frost,rt,itol,mplant,nogro,ksprt,sprtnd,
-                  max.ind,smgf,degdgf,LAI_method){
+                  max.ind,smgf,degdgf){
 
   max.seeds <- round(max.ind/nspec)-1 #needs to be less than max.ind
   if((max.ind - (max.seeds*nspec)) < 0) {
@@ -63,8 +63,6 @@ if(sum(ntrees) < max.ind){
   fola = 0
   nl = 1
 
-  if (LAI_method == 'species_specific_LAI'){exponent = 0 } # initialize species-specific equation
-
   #calculate leaf weight in G/plot and leaf area index
   for(i in 1:nspec){
     if(ntrees[i] == 0) next
@@ -78,31 +76,12 @@ if(sum(ntrees) < max.ind){
         folw = folw + ((slta[i]+sltb[i]*dbh[k])/2)^2*(3.14*fwt[i]*ret)
         fola = fola + ((1.9283295) * 10^-4)*((dbh[k])^2.129)
       }
-      code = spp.num[i]
-      if (LAI_method == 'species_specific_LAI'){ # g/m2
-        if (code == 'ACRU'){SLM = 60.58990405} # acer rubrum, red maple
-        if (code == 'ACSA3'){SLM = 28.19481571} # acer saccharum, sugar maple
-        if (code == 'BEAL2'){SLM = 28.19574899} # betula alleghaniensis, yellow birch
-        if (code == 'BELE'){SLM = 36.50034675} # betula lenta, sweet birch
-        if (code == 'FAGR'){SLM = 24.1073341} # fagus grandifolia, american beech
-        if (code == 'PIST'){SLM = 55.03011497} # pinus strobus, white pine
-        if (code == 'QUAL'){SLM = 76.14184465} # quercus alba, white oak
-        if (code == 'QURU'){SLM = 65.89359633} # quercus rubra, red oak
-        if (code == 'THOC2'){SLM = 56.7431509} # thuja occidentalis, northern white-cedar
-        if (code == 'TSCA'){SLM = 52.48517294} # tsuga canadensis, eastern hemlock
-        if (code == 'QUVE'){SLM = 74.56062} # quercus velutina, black oak (from BIEN trait database accessed 23/09/2022)
-        if (code == 'PIRU'){SLM = 304.6737} # picea rubens, red spruce (from BIEN trait database accessed 23/09/2022)
-        if (code == 'QUMO'){SLM = 76.14184465} # quercus montana, chestnut oak (same values as white oak, closest relative with data)
-        if (folw != 0){exponent = exponent + (-folw/(833.3*(1.0/.8)*SLM))} #Hall and Hollinger 2000
-      }
       nl = nl + ntrees[i]
   }
 
   fola[is.na(fola)] <- 0
-  #calculate amount of light at forest floor using original LINKAGES expression
-  if (LAI_method == 'species_specific_LAI'){al = 1*(exp(exponent))}
-  if (LAI_method == 'normal'){al = 1 * exp(-folw/93750)} #Original LINKAGES expression for calculating al
-  if (LAI_method == 'species_specific_LAI' & folw == 0){al = 1}
+  #calculate amount of light at forest floor
+  al = 1 * exp(-folw/93750)
   #calculate number of trees in stand
   ntot = nl - 1
 

@@ -92,7 +92,6 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
   iage.save <- array(0,dim=c(max.ind,nyear,iplot))
   awp.save <- array(0,dim=c(max.ind,nyear,iplot))
   npp.spp.save <- array(0,dim=c(nspec,nyear,iplot))
-  ba.save <- array(0, dim = c(max.ind, nyear, iplot))
 
   for(k in 1:iplot){ #loop over plots
 
@@ -135,19 +134,12 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
       dbh.save <- array(0,dim=c(max.ind,nyear,iplot))
       iage.save <- array(0,dim=c(max.ind,nyear,iplot))
       awp.save <- array(0,dim=c(max.ind,nyear,iplot))
-      ba.save <- array(0, dim = c(max.ind, nyear, iplot))
 
       temp.mat <- matrix(temp.mat,nyear,12)
       precip.mat <- matrix(precip.mat,nyear,12)
     }
     Rprof(interval=.005)
     for(i in 1:nyear){
-
-      # Specifying biomass estimation method from inputs
-      bio_method = bio_method
-
-      # Specifying either species_specific_LAI or normal (original LINKAGES) expression for calculating al
-      LAI_method = LAI_method
 
       #calculates degree days for the year
       degd <- tempe(temp.vec = temp.mat[i,1:12])
@@ -195,7 +187,7 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
             frost = spp.params$FROST, rt = temp.mat[i,1:12], itol = spp.params$ITOL,
             mplant = spp.params$MPLANT, nogro = nogro,
             ksprt = ksprt, sprtnd = spp.params$SPRTND, max.ind = max.ind, smgf=smgf,
-            degdgf = degdgf, LAI_method = LAI_method)
+            degdgf = degdgf)
 
       if(is.null(unlist(birth.out$ntrees, use.names = FALSE))){
         ntrees[,i,k] <- rep(0,nspec)
@@ -219,7 +211,7 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
           sltb = spp.params$SLTB, dbh = dbh, fwt = spp.params$FWT, b2 = spp.params$B2,
            b3 = spp.params$B3, itol =spp.params$ITOL, g = spp.params$G, degdgf = degdgf,
            smgf = smgf, sngf= sngf,frost = spp.params$FROST, rt = temp.mat[i,1:12], iage = iage,
-           nogro=nogro, LAI_method = LAI_method, spp.num = spp.params$Spp_Number)
+           nogro=nogro)
 
 
       if(is.null(unlist(grow.out$ntrees, use.names = FALSE))){
@@ -260,16 +252,15 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
       output.out <- output(availn = availn, tyln = tyln, nspec = nspec, frt=spp.params$FRT,
                          iage = iage,slta = spp.params$SLTA, max.ind = max.ind,
                          sltb = spp.params$SLTB,dbh = dbh,fwt = spp.params$FWT,tyl = tyl,
-                         ntrees=ntrees,awp=awp, bio_method=bio_method, spp.num=spp.params$Spp_Number)
+                         ntrees=ntrees,awp=awp)
 
       #conversion factors
       DEFAULT.C <- 0.48  ## mass percent C of biomass
       PLOT.AREA <- 833 ## m^2
-      toKG <- 100 ## g in Kg
+      toKG <- 1000 ## g in Kg
       yearSecs <- (3.15569 * 10^7) ## seconds in a year
 
       #save variables
-      ba.save[,i,k] = unlist(kill.out$ba, use.names = FALSE)
       awp.save[1:length(grow.out$awp),i,k] = unlist(grow.out$awp, use.names = FALSE)
       tstem[i,k] = unlist(output.out$atot, use.names = FALSE) #number of stems
       tab[i,k] = unlist(output.out$tbar, use.names = FALSE) #total aboveground biomass
@@ -291,25 +282,25 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
       ncohrt.save[i,k] = ncohrt
       npp.spp.save[,i,k] = (unlist(grow.out$npp.spp,use.names=FALSE) * (1 / PLOT.AREA) * (1 / yearSecs) * DEFAULT.C)
 
-    #print(paste("year = ",i))
+    print(paste("year = ",i))
     }
     Rprof(NULL)
     summaryRprof()
 
 
-  #print(paste("PLOT = ",k))
+  print(paste("PLOT = ",k))
   }
 
   #unit conversions for variables of interest #need to recheck more carefully later
   year <- seq(1,nyear,1)
   ag.biomass <- (tab  * (1 / PLOT.AREA) * DEFAULT.C) # Above Ground Biomass in kgC/m2 #total aboveground biomass
   abvgroundwood.biomass <- (abvgrnwood  * (1 / PLOT.AREA) * DEFAULT.C) # Above Ground Biomass in kgC/m2 #total aboveground biomass
-  total.soil.carbon <- (som + fl)  * DEFAULT.C # TotSoilCarb in kgC/m2
-  leaf.litter <- fl * DEFAULT.C # leaf litter in kgC/m2
-  ag.npp <- (tnap * (1 / PLOT.AREA) * (1 / yearSecs) * DEFAULT.C) # GWBI = NPP in linkages
-  hetero.resp <- (sco2c *(1 / PLOT.AREA) * (1 / yearSecs) * toKG) # HeteroResp in kgC/m^2/s
+  total.soil.carbon <- (som + fl) * 907.185 * (1/10000) * DEFAULT.C # TotSoilCarb in kgC/m2
+  leaf.litter <- fl * 907.185 * (1/10000) * DEFAULT.C # leaf litter in kgC/m2
+  ag.npp <- (tnap * (1 / 10000) * (1 / yearSecs) * DEFAULT.C * 907.185) # GWBI = NPP in linkages
+  hetero.resp <- (sco2c * (1/10000) * (1 / yearSecs) * 907.185) # HeteroResp in kgC/m^2/s
   nee <- ((ag.npp - hetero.resp))# NEE #possibly questionable
-  et <- aet.save * (1 / yearSecs) # Evap in kg/m^2/s
+  et <- aet.save * (1 / yearSecs) # Evap in mm/s
   agb.pft <- (bar  * (1 / PLOT.AREA) * DEFAULT.C) #biomass by PFT
   if(nspec>1){
     f.comp <- t(t(bar[,,1]  * (1 / PLOT.AREA) * DEFAULT.C) / colSums((as.matrix(bar[,,1]) * (1 / PLOT.AREA) * DEFAULT.C))) #f composition
@@ -339,7 +330,7 @@ linkages <- function(linkages.input, outdir, restart = NULL, linkages.restart = 
        dbh.save = dbh.save, iage.save = iage.save, C.mat = C.mat, tyl = tyl,
        ncohrt = ncohrt, area = area, water = water, ksprt = ksprt, tyl.save = tyl.save,
       ff=ff, gf.vec.save = gf.vec.save, algf.save.keep = algf.save.keep,
-      npp.spp.save=npp.spp.save, awp.save = awp.save, ba.save = ba.save, file = output.file)
+      npp.spp.save=npp.spp.save, awp.save = awp.save, file = output.file)
 
   file.exists(output.file)
 

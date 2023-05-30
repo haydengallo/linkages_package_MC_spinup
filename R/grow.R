@@ -161,7 +161,7 @@ grow <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
 #
 
 grow.opt <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
-                 degdgf,smgf,sngf,frost,rt,iage,nogro,spp.num, LAI_method){
+                 degdgf,smgf,sngf,frost,rt,iage,nogro){
   #initialize wood production
   awp = matrix(0,1,max.ind)
   algf.save <- matrix(NA,max.ind,nspec)
@@ -175,11 +175,9 @@ grow.opt <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
     if(ntot > max.ind) print("too many trees -- grow")
 
     #initialize canopy leaf biomass profile
-    if (LAI_method == 'species_specific_LAI'){
-      sumla <- array(0,dim=c(1,700,nspec))}
-    if (LAI_method == 'normal'){sumla = matrix(0,1,700)}
-
-    #get species list
+    sumla = matrix(0,1,700)
+    
+    #get species list 
     spp.ind = c()
     for (k in 1:nspec){
       spp.ind = c(spp.ind, rep(k, ntrees[k]))
@@ -187,26 +185,23 @@ grow.opt <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
 
     #loop for calculating canopy profile tree-by-tree
     for (j in 1:ntot){
-
+      
       # gather information about this tree
       sp = spp.ind[j]
       ret = frt[sp]
       age = iage[j]
-      if (age < ret) ret = age
-
+      if (age < ret) ret = age 
+      
       # calculate height profile
       iht = ((b2[sp]*dbh[j]-b3[sp]*dbh[j]^2)/10)+1
       if (iht < 1) iht = 1
       if (iht > 700) print("trees too tall")
-
-      #calculate leaf biomass for tree and add it to the appropriate canopy level
-      if (LAI_method == 'species_specific_LAI'){
-        sumla[1,iht,sp] = sumla[1,iht,sp] + ((((slta[sp] + sltb[sp] * dbh[j]) / 2) ^ 2) * 3.14 * fwt[sp] * ret)}
-      else{
-        sumla[iht] = sumla[iht] + ((((slta[sp] + sltb[sp] * dbh[j]) / 2) ^ 2) * 3.14 * fwt[sp] * ret)}
-      }
-
-    # MK: removed this because it does not correctly increment foliage weight when there is more than one tree of
+      
+      #calculate leaf biomass for tree and add it to the appropriate canopy level 
+      sumla[iht] = sumla[iht] + ((((slta[sp] + sltb[sp] * dbh[j]) / 2) ^ 2) * 3.14 * fwt[sp] * ret)
+    }
+    
+    # MK: removed this because it does not correctly increment foliage weight when there is more than one tree of 
     # the same height and species (July 2020)
     #nl = 1
     #for(j in 1:nspec){
@@ -231,14 +226,7 @@ grow.opt <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
     # MK: the following recursive method does not correctly calcuulate cumulative foliage weight (July 2020)
     #j1 = 700-1:699
     #sumla[j1] = sumla[j1] + sumla[j1 + 1]
-    if (LAI_method == 'species_specific_LAI'){
-      for (i in 1:nspec){
-        sumla[1,,i] <- rev(cumsum(rev(sumla[1,,i])))
-      }
-    }
-    if (LAI_method == 'normal'){
-      sumla <- rev(cumsum(rev(sumla)))
-    }
+    sumla <- rev(cumsum(rev(sumla)))
 
     #main loop for calculating diameter increment
     nl = 1
@@ -253,32 +241,8 @@ grow.opt <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
         slar = sumla[iht]
 
 
-        if (LAI_method == 'species_specific_LAI'){exponent = 0}
-        if (LAI_method == 'species_specific_LAI'){
-          for (l in 1:nspec){
-            code = spp.num[l]
-            if (code == 'ACRU'){SLM = 60.58990405} # acer rubrum, red maple
-            if (code == 'ACSA3'){SLM = 28.19481571} # acer saccharum, sugar maple
-            if (code == 'BEAL2'){SLM = 28.19574899} # betula alleghaniensis, yellow birch
-            if (code == 'BELE'){SLM = 36.50034675} # betula lenta, sweet birch
-            if (code == 'FAGR'){SLM = 24.1073341} # fagus grandifolia, american beech
-            if (code == 'PIST'){SLM = 55.03011497} # pinus strobus, white pine
-            if (code == 'QUAL'){SLM = 76.14184465} # quercus alba, white oak
-            if (code == 'QURU'){SLM = 65.89359633} # quercus rubra, red oak
-            if (code == 'THOC2'){SLM = 56.7431509} # thuja occidentalis, northern white-cedar
-            if (code == 'TSCA'){SLM = 52.48517294} # tsuga canadensis, eastern hemlock
-            if (code == 'QUVE'){SLM = 74.56062} # quercus velutina, black oak (from BIEN trait database accessed 23/09/2022)
-            if (code == 'PIRU'){SLM = 304.6737} # picea rubens, red spruce (from BIEN trait database accessed 23/09/2022)
-            if (code == 'QUMO'){SLM = 76.14184465} # quercus montana, chestnut oak (same values as white oak, closest relative with data)
-            slar = sumla[1,iht,l]
-            exponent = exponent + ((-slar)/(833.3*(1.0/.8)*SLM))
-          }
-          al = 1* (exp(exponent)) #Hall and Hollinger 2000
-        }
-        if (LAI_method == 'normal'){
-            slar = sumla[iht]
-            #calculate available light to this tree (% full sunlight)
-            al = 1 * exp(-slar/93750)} ### Original LINKAGES expression for calculating al
+        #calculate available light to this tree (% full sunlight)
+        al = 1 * exp(-slar/93750)
 
         #calculate available light multiplier if tree is shade intolerant
         if(itol[i] >= 2) {
@@ -316,7 +280,7 @@ grow.opt <- function(max.ind,nspec,ntrees,frt,slta,sltb,dbh,fwt, b2,b3, itol,g,
 
         #check if increment is less than minimum required for growth. if dinc less than 1 mm or 10% of ndcmax or if january temp is less than frost tolerance, flag tree in nogro
         #if(dinc < .1*dncmax | frost[i] > rt[1]) dinc = 0
-
+        
         # If the trees are too chilly, make them not grow
         if(frost[i] > rt[1]) dinc = 0
         # Flag as NOGRO only because of slow growth
