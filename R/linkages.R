@@ -333,8 +333,8 @@ linkages <- function(linkages.input, outdir, spinup_input){
       output.check(linkages.input,outdir)
 
     }
-  }
 
+  else{
 
   load(linkages.input) #normal linkages input
   load(spinup_input) #input from the spinup
@@ -670,4 +670,5 @@ linkages <- function(linkages.input, outdir, spinup_input){
 
   output.check(linkages.input,outdir)
 
+  }
 }
