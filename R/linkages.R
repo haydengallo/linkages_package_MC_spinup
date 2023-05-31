@@ -191,12 +191,6 @@ linkages <- function(linkages.input, outdir, spinup_input){
     Rprof(interval=.005)
     for(i in 2:nyear){
 
-      # Specifying biomass estimation method from inputs
-      #bio_method = bio_method
-
-      # Specifying either species_specific_LAI or normal (original LINKAGES) expression for calculating al
-      LAI_method = LAI_method
-
       #calculates degree days for the year
       degd <- tempe(temp.vec = temp.mat[i-1,1:12])
       #degd = unlist(tempe.out$degd, use.names = FALSE)
@@ -243,7 +237,7 @@ linkages <- function(linkages.input, outdir, spinup_input){
                          frost = spp.params$FROST, rt = temp.mat[i-1,1:12], itol = spp.params$ITOL,
                          mplant = spp.params$MPLANT, nogro = nogro,
                          ksprt = ksprt, sprtnd = spp.params$SPRTND, max.ind = max.ind, smgf=smgf,
-                         degdgf = degdgf)#LAI_method = LAI_method)#spp.num = spp.params$Spp_Number)
+                         degdgf = degdgf)
 
       if(is.null(unlist(birth.out$ntrees, use.names = FALSE))){
         ntrees[,i,k] <- rep(0,nspec)
@@ -267,7 +261,7 @@ linkages <- function(linkages.input, outdir, spinup_input){
                            sltb = spp.params$SLTB, dbh = dbh, fwt = spp.params$FWT, b2 = spp.params$B2,
                            b3 = spp.params$B3, itol =spp.params$ITOL, g = spp.params$G, degdgf = degdgf,
                            smgf = smgf, sngf= sngf,frost = spp.params$FROST, rt = temp.mat[i-1,1:12], iage = iage,
-                           nogro=nogro,spp.num = spp.params$Spp_Number)#, LAI_method = LAI_method, )
+                           nogro=nogro,spp.num = spp.params$Spp_Number)
 
 
       if(is.null(unlist(grow.out$ntrees, use.names = FALSE))){
