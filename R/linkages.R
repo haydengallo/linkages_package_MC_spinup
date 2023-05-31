@@ -379,7 +379,7 @@ linkages <- function(linkages.input, outdir, spinup_input){
   npp.spp.save <- array(0,dim=c(nspec,nyear,iplot))
 
   ### taking inputs from spinup_input and putting at index 1 in storage matrices/arrays
-  spinup_len
+  spinup_len <- length(tab.spinup)
   ### add to arrays
 
 
