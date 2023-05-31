@@ -91,8 +91,6 @@ linkages <- function(linkages.input, outdir, spinup_input){
 
       for(k in 1:iplot){ #loop over plots
 
-        if(restart == FALSE){
-
           plotin.out <- plotin(iplot = k, basesc = basesc, basesn = basesn, max.ind = max.ind,
                                nspec = nspec) # initializes storage matrices with zeros for each plot
 
@@ -106,34 +104,6 @@ linkages <- function(linkages.input, outdir, spinup_input){
           iage <- unlist(plotin.out$iage, use.names = FALSE)
 
 
-        } else {
-          #load last stopping point
-          load(linkages.restart)
-          #redo storage
-          tstem = matrix(0,nyear,iplot) #number of stems
-          tab = matrix(0,nyear,iplot) #total aboveground biomass
-          fl = matrix(0,nyear,iplot) #leaf litter
-          totl = matrix(0,nyear,iplot) #leaf litter N
-          tnap = matrix(0,nyear,iplot) #net aboveground production
-          avln = matrix(0,nyear,iplot) #available nitrogen
-          cn = matrix(0,nyear,iplot) #humus C:N ratio
-          sco2c = matrix(0,nyear,iplot) #soil co2 evolution
-          som = matrix(0,nyear,iplot) #soil organic matter
-          aet.save = matrix(0,nyear,iplot)
-          ncohrt.save = matrix(0,nyear,iplot)
-          tyl.save = array(0,dim=c(20,nyear,iplot))
-          ntrees.birth <- array(0,dim=c(nspec,nyear,iplot))
-          ntrees.grow <- array(0,dim=c(nspec,nyear,iplot))
-          ntrees.kill <- array(0,dim=c(nspec,nyear,iplot))
-          bar <- npp.spp.save <- array(0,dim=c(nspec,nyear,iplot))
-          nogro.save <- array(0,dim=c(max.ind,nyear,iplot))
-          dbh.save <- array(0,dim=c(max.ind,nyear,iplot))
-          iage.save <- array(0,dim=c(max.ind,nyear,iplot))
-          awp.save <- array(0,dim=c(max.ind,nyear,iplot))
-
-          temp.mat <- matrix(temp.mat,nyear,12)
-          precip.mat <- matrix(precip.mat,nyear,12)
-        }
         Rprof(interval=.005)
         for(i in 1:nyear){
 
