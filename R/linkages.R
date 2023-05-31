@@ -261,7 +261,7 @@ linkages <- function(linkages.input, outdir, spinup_input){
                            sltb = spp.params$SLTB, dbh = dbh, fwt = spp.params$FWT, b2 = spp.params$B2,
                            b3 = spp.params$B3, itol =spp.params$ITOL, g = spp.params$G, degdgf = degdgf,
                            smgf = smgf, sngf= sngf,frost = spp.params$FROST, rt = temp.mat[i-1,1:12], iage = iage,
-                           nogro=nogro,spp.num = spp.params$Spp_Number)
+                           nogro=nogro)
 
 
       if(is.null(unlist(grow.out$ntrees, use.names = FALSE))){
@@ -302,7 +302,7 @@ linkages <- function(linkages.input, outdir, spinup_input){
       output.out <- output(availn = availn, tyln = tyln, nspec = nspec, frt=spp.params$FRT,
                            iage = iage,slta = spp.params$SLTA, max.ind = max.ind,
                            sltb = spp.params$SLTB,dbh = dbh,fwt = spp.params$FWT,tyl = tyl,
-                           ntrees=ntrees,awp=awp)#, spp.num = spp.params$Spp_Number)#,bio_method = bio_method)
+                           ntrees=ntrees,awp=awp)
 
       #conversion factors
       DEFAULT.C <- 0.48  ## mass percent C of biomass
